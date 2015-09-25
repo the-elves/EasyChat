@@ -150,12 +150,13 @@ void ChatRoom::removeUser(string s){
 void ChatRoom::handleControlMessage(Message m){
     if(strstr(m.getText(),"###close")!=NULL)
         removeUser(m.getFrom());
-    else if(strstr(m.getText(),"###heartBeat"))
+    else if(strstr(m.getText(),"###heartbeat"))
         replyHeartBeat(m.getFrom(),m.getText());
 }
 
 void ChatRoom::replyHeartBeat(string s, char *text){
     vector<User>::iterator i;
+    i=activeUsers.begin();
     pthread_mutex_lock(&lock);
     cout<<"Aquiring lock for heartbeat"<<endl;
     while(i != activeUsers.end()){
@@ -164,9 +165,7 @@ void ChatRoom::replyHeartBeat(string s, char *text){
         }
         i++;
     }
-    for(i = activeUsers.begin();i!=activeUsers.end();i++){
-        cout<<"Heartbeat Writting"<<endl; write(i->getSocket(), text, strlen(text));
-    }
+    cout<<"Heartbeat Writting"<<endl; write(i->getSocket(), text, strlen(text));
     pthread_mutex_unlock(&lock);
 }
 

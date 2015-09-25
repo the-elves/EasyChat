@@ -29,7 +29,8 @@ public slots:
     void writeMessage(const QString& msg);
     void readyRead();
     void unicast();
-    void heartBeat();
+    void heartBeatSend();
+    void heartBeatReceive();
 
 
 private slots:

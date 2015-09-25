@@ -22,11 +22,14 @@ ChatClient::ChatClient(QString subject, QWidget *parent) :
     ui->labelOnlineUsers->hide();
 }
 
-void ChatClient::heartBeat(){
+void ChatClient::heartBeatSend(){
     heartBeatReceived = false;
     const QString s = "###heartbeat";
     writeMessage(s);
     std::cout<<"Heartbeat sent"<<std::endl;
+}
+
+void ChatClient::heartBeatReceive(){
     if(heartBeatReceived)
         std::cout<<"heartbeat received"<<std::endl;
     else{
@@ -46,10 +49,16 @@ void ChatClient::start(const QString& msg) {
     mapper->setMapping(&client, msg);
     connect(mapper, SIGNAL(mapped(const QString&)), this, SLOT(writeMessage(const QString&)));
     connect(&client, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    QTimer *heartBeatTimer;
-    heartBeatTimer = new QTimer(this);
-    connect(heartBeatTimer, SIGNAL(timeout()), this, SLOT(heartBeat()));
-    heartBeatTimer->start(1000);
+    QTimer *heartBeatSendTimer;
+    heartBeatSendTimer = new QTimer(this);
+    connect(heartBeatSendTimer, SIGNAL(timeout()), this, SLOT(heartBeatSend()));
+    QTimer *heartBeatReceiveTimer;
+    heartBeatReceiveTimer = new QTimer(this);
+    connect(heartBeatReceiveTimer, SIGNAL(timeout()), this, SLOT(heartBeatReceive()));
+    heartBeatSendTimer->start(5000);
+    QThread::sleep(2);
+    heartBeatReceiveTimer->start(5000);
+
 }
 
 void ChatClient::startConnection(QString address, quint16 port) {
