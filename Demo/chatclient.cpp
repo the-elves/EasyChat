@@ -22,6 +22,18 @@ ChatClient::ChatClient(QString subject, QWidget *parent) :
     ui->labelOnlineUsers->hide();
 }
 
+void ChatClient::heartBeat(){
+    heartBeatReceived = false;
+    const QString s = "###heartbeat";
+    writeMessage(s);
+    std::cout<<"Heartbeat sent"<<std::endl;
+    if(heartBeatReceived)
+        std::cout<<"heartbeat received"<<std::endl;
+    else{
+        std::cout<<"heartbeat not received"<<std::endl;
+    }
+}
+
 ChatClient::~ChatClient() {
     client.close();
     delete ui;
@@ -34,6 +46,10 @@ void ChatClient::start(const QString& msg) {
     mapper->setMapping(&client, msg);
     connect(mapper, SIGNAL(mapped(const QString&)), this, SLOT(writeMessage(const QString&)));
     connect(&client, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    QTimer *heartBeatTimer;
+    heartBeatTimer = new QTimer(this);
+    connect(heartBeatTimer, SIGNAL(timeout()), this, SLOT(heartBeat()));
+    heartBeatTimer->start(1000);
 }
 
 void ChatClient::startConnection(QString address, quint16 port) {
@@ -95,10 +111,17 @@ void ChatClient::readyRead() {
                 }
             }
         }
+        else if(str.contains("###heartbeat")){
+            heartBeatReceived = true;
+        }
         else {
             ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + str + "\n");
         }
+        std::cout<<str.toStdString()<<std::endl;
     }
+
+
+
 }
 
 void ChatClient::unicast() {

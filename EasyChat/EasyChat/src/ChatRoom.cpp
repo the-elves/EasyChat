@@ -6,12 +6,12 @@ ChatRoom::ChatRoom(string subject)
 {
     tv.tv_sec = 2;
     tv.tv_usec = 0;
-
+    firstUser = true;
     pthread_mutex_init(&lock,NULL);
-
     sockaddr_in localhost, client;
     unsigned long clilen;
     this->subject = subject;
+    //Scoket initialization
     servSocket = socket(AF_INET,SOCK_STREAM ,0);
     bzero(&localhost,sizeof(sockaddr_in));
     localhost.sin_family = AF_INET;
@@ -21,6 +21,21 @@ ChatRoom::ChatRoom(string subject)
     if(b<0){
         exit(1);
     }
+
+//
+//    heartBeatSocket = socket(AF_INET,SOCK_STREAM ,0);
+//    bzero(&localhost,sizeof(sockaddr_in));
+//    localhost.sin_family = AF_INET;
+//    inet_aton("127.0.0.1", &(localhost.sin_addr));
+//    localhost.sin_port = htons(4321);
+//    int b = bind(heartBeatSocket,(sockaddr*)&localhost,sizeof(sockaddr_in));
+//    if(b<0){
+//        cout<<"heartBeat failed"<<endl;
+//        exit(1);
+//    }
+
+//socket Initialization ends
+
     cout<<"waiting for join"<<endl;
     bzero(&client, sizeof(client));
     listen(servSocket, 5);
@@ -38,10 +53,48 @@ ChatRoom::ChatRoom(string subject)
             maxfd = maxfd>clisocket?maxfd:clisocket;
             pthread_mutex_lock(&lock);
             addUser(string(cliName), clientIp,clisocket,port);
+            cout<<clisocket<<"added"<<endl;
+            usleep(100000);
+            if(firstUser == true){
+                cout<<"FirstUser"<<endl;
+                setFallBack(clientIp, port);
+                firstUser = false;
+                notifyFallBackResponsiblity(clisocket);
+
+            }
+            else{
+                cout<<"not first user"<<endl;
+                sendFallBackInfo(clisocket);
+            }
             pthread_mutex_unlock(&lock);
             cout<<cliName<<" joined"<<endl;
         }
     }
+
+}
+
+
+
+void ChatRoom::notifyFallBackResponsiblity(int cli){
+    string fallBackInfoString = "###";
+    fallBackInfoString += "youarefallback\0";
+    cout<<"writubg to "<<cli<<endl;
+    cout<<"notify Writting"<<endl; cout<<write(cli, fallBackInfoString.c_str(), fallBackInfoString.length())<<endl;
+    cout<<"resp notified"<<endl;
+}
+
+void ChatRoom::setFallBack(string ip, int port){
+    this->fallBackIp = ip;
+    this->fallBackPort = port;
+    cout<<"fallback set"<<endl;
+}
+
+void ChatRoom::sendFallBackInfo(int cli){
+    string fallBackInfoString = "###";
+    fallBackInfoString += "fallback" + fallBackIp + "#" +to_string(fallBackPort)+"\0";
+    cout<<"writubg to "<<cli<<endl;
+    cout<<"sending fallabck stirng :"<<fallBackInfoString<<endl;
+    cout<<"send fbinfo Writting"<<endl; cout<<write(cli, fallBackInfoString.c_str(), fallBackInfoString.length())<<endl;
 
 }
 void ChatRoom::setFds(){
@@ -64,7 +117,7 @@ void ChatRoom::addUser(string name, string clientIp, int sock,int port){
         onlineUsersName += "!@#" + i->getName();
     }
     for(i = activeUsers.begin();i!=activeUsers.end();i++){
-        write(i->getSocket(), onlineUsersName.c_str(), strlen(onlineUsersName.c_str())+1);
+        cout<<"adduser Writting"<<endl; write(i->getSocket(), onlineUsersName.c_str(), strlen(onlineUsersName.c_str())+1);
     }
 }
 
@@ -83,19 +136,38 @@ void ChatRoom::removeUser(string s){
             indexToDelete++;
         }
     }
-    pthread_mutex_unlock(&lock);
     string onlineUsersName;
     for(i = activeUsers.begin();i!=activeUsers.end();i++){
         onlineUsersName += "!@#" + i->getName();
     }
     for(i = activeUsers.begin();i!=activeUsers.end();i++){
-        write(i->getSocket(), onlineUsersName.c_str(), strlen(onlineUsersName.c_str())+1);
+        cout<<"Remove user Writting"<<endl; write(i->getSocket(), onlineUsersName.c_str(), strlen(onlineUsersName.c_str())+1);
     }
+    pthread_mutex_unlock(&lock);
 }
 
 
 void ChatRoom::handleControlMessage(Message m){
-    removeUser(m.getFrom());
+    if(strstr(m.getText(),"###close")!=NULL)
+        removeUser(m.getFrom());
+    else if(strstr(m.getText(),"###heartBeat"))
+        replyHeartBeat(m.getFrom(),m.getText());
+}
+
+void ChatRoom::replyHeartBeat(string s, char *text){
+    vector<User>::iterator i;
+    pthread_mutex_lock(&lock);
+    cout<<"Aquiring lock for heartbeat"<<endl;
+    while(i != activeUsers.end()){
+        if(i->getName() == s){
+            break;
+        }
+        i++;
+    }
+    for(i = activeUsers.begin();i!=activeUsers.end();i++){
+        cout<<"Heartbeat Writting"<<endl; write(i->getSocket(), text, strlen(text));
+    }
+    pthread_mutex_unlock(&lock);
 }
 
 bool ChatRoom::isControlMessage(Message m){
@@ -158,7 +230,7 @@ void ChatRoom::chatReadManagement(void ){
 
 
 void ChatRoom::chatWriteManagement(){
-    //cout<< "in write managemt"<<endl;
+    //cout<< "in writewrite managemt"<<endl;
     vector<User>::iterator i;
     Message m;
     //int n;
@@ -174,7 +246,7 @@ void ChatRoom::chatWriteManagement(){
                         string msg = m.getFrom();
                         msg += ": ";
                         msg += m.getText();
-                        write(i->getSocket(), msg.c_str(), strlen(msg.c_str())+1);
+                        cout<<"write mgt Writting 1"<<endl; write(i->getSocket(), msg.c_str(), strlen(msg.c_str())+1);
                         //msgsToWrite.pop_back();
                         break;
                     }
@@ -183,7 +255,7 @@ void ChatRoom::chatWriteManagement(){
                 string msg = m.getFrom();
                 msg += ": ";
                 msg += m.getText();
-                write(i->getSocket(), msg.c_str(), strlen(msg.c_str())+1);
+                cout<<"chat mgt Writting 2"<<endl; write(i->getSocket(), msg.c_str(), strlen(msg.c_str())+1);
             }
         }
         msgsToWrite.pop_back();

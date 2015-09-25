@@ -5,7 +5,8 @@
 #include <QTcpSocket>
 #include <QPushButton>
 #include "unicast.h"
-
+#include <QTimer>
+#include <QThread>
 namespace Ui {
 class ChatClient;
 }
@@ -19,14 +20,17 @@ public:
     static std::vector<Unicast*> unichat;
     explicit ChatClient(QString subject, QWidget *parent = 0);
     ~ChatClient();
+    bool heartBeatReceived;
     void start(const QString& msg);
     void startConnection(QString address, quint16 port);
     void closeEvent(QCloseEvent *event);
-
+    //QTimer *heartBeatTimer;
 public slots:
     void writeMessage(const QString& msg);
     void readyRead();
     void unicast();
+    void heartBeat();
+
 
 private slots:
     void on_pushButtonSend_clicked();

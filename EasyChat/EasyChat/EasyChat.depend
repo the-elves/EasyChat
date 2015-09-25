@@ -162,3 +162,45 @@
 1440143170 source:/home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/src/User.cpp
 	"User.h"
 
+1441705884 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/main.cpp
+	<iostream>
+	<sys/socket.h>
+	<netinet/in.h>
+	<ctype.h>
+	"ChatRoom.h"
+	"Message.h"
+	"User.h"
+	<signal.h>
+
+1443196300 /home/illuminati/EasyChat 1.2/EasyChat/EasyChat/include/ChatRoom.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+	<ctype.h>
+	<thread>
+	<vector>
+	<string.h>
+	<string>
+	"User.h"
+	<unistd.h>
+	"Message.h"
+	<pthread.h>
+
+1443185443 /home/illuminati/EasyChat 1.2/EasyChat/EasyChat/include/User.h
+	<string>
+
+1443154734 /home/illuminati/EasyChat 1.2/EasyChat/EasyChat/include/Message.h
+	<string.h>
+	<string>
+
+1443037440 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/Message.cpp
+	"Message.h"
+
+1443196521 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/ChatRoom.cpp
+	"ChatRoom.h"
+	<string>
+	<iostream>
+
+1443186467 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/User.cpp
+	"User.h"
+

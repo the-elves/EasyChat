@@ -5,7 +5,7 @@
 using namespace std;
 
 enum MessageType {
-            Close, Connect, Msg
+            Close, Connect, Msg, Control
 };
 
 class Message
