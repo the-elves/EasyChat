@@ -1,0 +1,164 @@
+# depslib dependency file v1.0
+1440382431 source:/home/illuminati/EasyChat/EasyChat/main.cpp
+	<iostream>
+	<sys/socket.h>
+	<netinet/in.h>
+	<ctype.h>
+	"ChatRoom.h"
+	"Message.h"
+	"User.h"
+	<signal.h>
+
+1440384001 /home/illuminati/EasyChat/EasyChat/include/ChatRoom.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+	<ctype.h>
+	<thread>
+	<vector>
+	<string.h>
+	<string>
+	"User.h"
+	<unistd.h>
+	"Message.h"
+	<pthread.h>
+
+1440142926 /home/illuminati/EasyChat/EasyChat/include/User.h
+	<string>
+
+1440393139 /home/illuminati/EasyChat/EasyChat/include/Message.h
+	<string.h>
+	<string>
+
+1440394983 source:/home/illuminati/EasyChat/EasyChat/src/ChatRoom.cpp
+	"ChatRoom.h"
+	<string>
+	<iostream>
+
+1440392892 source:/home/illuminati/EasyChat/EasyChat/src/Message.cpp
+	"Message.h"
+
+1440143170 source:/home/illuminati/EasyChat/EasyChat/src/User.cpp
+	"User.h"
+
+1441705884 source:/home/suhasini/Downloads/EasyChat/EasyChat/main.cpp
+	<iostream>
+	<sys/socket.h>
+	<netinet/in.h>
+	<ctype.h>
+	"ChatRoom.h"
+	"Message.h"
+	"User.h"
+	<signal.h>
+
+1442599185 /home/suhasini/Downloads/EasyChat/EasyChat/include/ChatRoom.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+	<ctype.h>
+	<thread>
+	<vector>
+	<string.h>
+	<string>
+	"User.h"
+	<unistd.h>
+	"Message.h"
+	<pthread.h>
+
+1440142926 /home/suhasini/Downloads/EasyChat/EasyChat/include/User.h
+	<string>
+
+1440393138 /home/suhasini/Downloads/EasyChat/EasyChat/include/Message.h
+	<string.h>
+	<string>
+
+1440392892 source:/home/suhasini/Downloads/EasyChat/EasyChat/src/Message.cpp
+	"Message.h"
+
+1440143170 source:/home/suhasini/Downloads/EasyChat/EasyChat/src/User.cpp
+	"User.h"
+
+1441705884 source:/home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/main.cpp
+	<iostream>
+	<sys/socket.h>
+	<netinet/in.h>
+	<ctype.h>
+	"ChatRoom.h"
+	"Message.h"
+	"User.h"
+	<signal.h>
+
+1440623900 /home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/include/ChatRoom.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+	<ctype.h>
+	<thread>
+	<vector>
+	<string.h>
+	<string>
+	"User.h"
+	<unistd.h>
+	"Message.h"
+	<pthread.h>
+
+1440142926 /home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/include/User.h
+	<string>
+
+1440393139 /home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/include/Message.h
+	<string.h>
+	<string>
+
+1440392892 source:/home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/src/Message.cpp
+	"Message.h"
+
+1440143170 source:/home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/src/User.cpp
+	"User.h"
+
+1441882405 source:/home/suhasini/My Data/AOS Chat Application/EasyChat/EasyChat/src/ChatRoom.cpp
+	"ChatRoom.h"
+	<string>
+	<iostream>
+
+1441705884 source:/home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/main.cpp
+	<iostream>
+	<sys/socket.h>
+	<netinet/in.h>
+	<ctype.h>
+	"ChatRoom.h"
+	"Message.h"
+	"User.h"
+	<signal.h>
+
+1440623900 /home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/include/ChatRoom.h
+	<sys/socket.h>
+	<netinet/in.h>
+	<arpa/inet.h>
+	<ctype.h>
+	<thread>
+	<vector>
+	<string.h>
+	<string>
+	"User.h"
+	<unistd.h>
+	"Message.h"
+	<pthread.h>
+
+1440142926 /home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/include/User.h
+	<string>
+
+1440393138 /home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/include/Message.h
+	<string.h>
+	<string>
+
+1441882542 source:/home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/src/ChatRoom.cpp
+	"ChatRoom.h"
+	<string>
+	<iostream>
+
+1440392892 source:/home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/src/Message.cpp
+	"Message.h"
+
+1440143170 source:/home/suhasini/My Data/AOS Chat Application/BAD/EasyChat/EasyChat/src/User.cpp
+	"User.h"
+

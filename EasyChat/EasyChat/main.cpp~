@@ -1,0 +1,14 @@
+//#include <iostream>
+#include"ChatRoom.h"
+//#include"Message.h"
+//#include"User.h"
+using namespace std;
+
+
+
+int main()
+{
+    cout << "Hello world!" << endl;
+    ChatRoom r("awesome");
+    return 0;
+}
