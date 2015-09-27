@@ -39,6 +39,8 @@ void ChatClient::heartBeatReceive(){
         std::cout<<"heartbeat received"<<std::endl;
     }
     else{
+        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "Switching " + "\n");
+        ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
         modeCentralized = false;
         std::cout<<"heartbeat not received"<<std::endl;
         emit stopTimers();
@@ -51,6 +53,8 @@ void ChatClient::heartBeatReceive(){
             a.ip = Ip;
             a.port = inPort;
             ring.append(a);
+            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "fallback Strarted " + "\n");
+            ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
         }
         else {
             int seed = 0;
@@ -61,10 +65,12 @@ void ChatClient::heartBeatReceive(){
                 seed = seed * 10 + a[i];
             }
             qsrand(seed);
-            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "seed set to = " +QString::number(seed) + "\n");
+            //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "seed set to = " +QString::number(seed) + "\n");
             QThread::sleep(5 + qrand()%3);
             initializeIncoming();
+            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " attempted to connect to peers"  + "\n");
             this->connectToFallbackServer();
+            ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
         }
     }
 }
@@ -111,6 +117,8 @@ void ChatClient::msgFromPrevious(){
         str.remove(0,str.indexOf(">")+1);
         if(!(this->windowTitle() == temp)){
             ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + temp + ":" + str + "\n");
+            ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
+            ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
             outgoing->write(str1.toStdString().c_str());
         }
     }
@@ -121,13 +129,15 @@ void ChatClient::connectToFallbackServer() {
     QHostAddress addr(this->Ip);
     peer.connectToHost(addr, port);
     if(peer.waitForConnected(5000))
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "fallback connected" + "\n");
+        //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "fallback connected" + "\n");
+        std::cout<<"fallbackConnected";
     else
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "fallback not connected" + QString::number(port) + this->Ip + "\n");
+        std::cout<<"fallback not connected";
+        //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "fallback not connected" + QString::number(port) + this->Ip + "\n");
     connect(&peer, SIGNAL(readyRead()), this, SLOT(fallbackReadyRead()));
     QString str = "$$$" + Ip + "$" + QString::number(inPort);
     peer.write(str.toStdString().c_str());
-    ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "sent my info "+str + "\n");
+    //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "sent my info "+str + "\n");
 }
 
 //on client read form fallback server
@@ -143,19 +153,21 @@ void ChatClient::fallbackReadyRead() {
             QString rIp= temp.left(temp.indexOf("#"));
             int rport = temp.mid(temp.indexOf("#") + 1, temp.length()).toInt();
             QHostAddress addr(rIp);
-            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "attempt|" +QString::number(rport)+":" + rIp + "|\n");
+            //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "attempt|" +QString::number(rport)+":" + rIp + "|\n");
             outgoing->connectToHost(addr, rport);
             if(outgoing->waitForConnected(5000))
-                ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "attempt succss" +QString::number(rport)+":" + rIp + "\n");
+                std::cout<<"attemp success";
+                //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "attempt succss" +QString::number(rport)+":" + rIp + "\n");
             else
-                ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "attempt failed" +QString::number(rport)+":" + rIp + "\n");
+                std::cout<<"faild";
+                //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "attempt failed" +QString::number(rport)+":" + rIp + "\n");
 
         }
         else if(str.startsWith("takenewsockaddr")){
             initializeIncoming();
             QString str = "$$$" + Ip + "$" + QString::number(inPort);
             peer.write(str.toStdString().c_str());
-            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "sent my info "+str + "\n");
+            //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "sent my info "+str + "\n");
         }
     }
 }
@@ -163,11 +175,11 @@ void ChatClient::fallbackReadyRead() {
 void ChatClient::startFallbackServer() {
     server = new QTcpServer(this);
     if(!server->listen(QHostAddress::Any, port)){
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "server failed" + QString::number(port) + "\n");
+        //ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "server failed" + QString::number(port) + "\n");
         std::cout<<server->errorString().toStdString()<<std::endl;
     }
-    else
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "server running" + "\n");
+//    else
+//        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "server running" + "\n");
 
     connect(server, SIGNAL(newConnection()), this, SLOT(myNewConnection()));
 }
@@ -182,7 +194,7 @@ void ChatClient::myNewConnection() {
     socket->write(instructionString.toStdString().c_str());
     clients.append(socket);
     currentClient = socket;
-    ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "told to " +instructionString + "\n");
+//    ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "told to " +instructionString + "\n");
 
 }
 
@@ -198,8 +210,8 @@ void ChatClient::newHostReadyRead(){
         for(int i = 0; i<ring.length(); i++){
             if(ring.at(i).ip == tempIp && ring.at(i).port == tempport){
                 currentClient->write("takenewsockaddr");
-                ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() +
-                                             " " + "take an new port" + "\n");
+//                ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() +
+//                                             " " + "take an new port" + "\n");
                 return;
             }
         }
@@ -211,11 +223,11 @@ void ChatClient::newHostReadyRead(){
         for(int i = 0; i<ring.length(); i++){
             ipstring = ipstring + ring.at(i).ip + ":" + QString::number(ring.at(i).port) + "#";
         }
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() +
-                                     " " + "complete ring " +ipstring + "\n");
+//        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() +
+//                                     " " + "complete ring " +ipstring + "\n");
         QHostAddress addr(tempIp);
         outgoing->connectToHost(addr, tempport);
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "head Connected to" +QString::number(tempport) + tempIp + "\n");
+//        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "head Connected to" +QString::number(tempport) + tempIp + "\n");
 
     }
 }
@@ -337,7 +349,7 @@ void ChatClient::readyRead() {
 
         }
         else {
-            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + str + "\n");
+          //  ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + str + "\n");
         }
         std::cout<<str.toStdString()<<std::endl;
     }
@@ -382,6 +394,8 @@ void ChatClient::on_pushButtonSend_clicked() {
     if(modeCentralized){
     ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + ui->lineEditName->text() + ": " + ui->textEditMsg->toPlainText() + "\n");
     writeMessage(ui->textEditMsg->toPlainText());
+    ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
+    ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
     ui->textEditMsg->setText("");
     }
     else{
