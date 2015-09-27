@@ -1,6 +1,7 @@
 #include "ChatRoom.h"
 #include<string>
 #include<iostream>
+int ChatRoom::iter;
 using namespace std;
 ChatRoom::ChatRoom(string subject)
 {
@@ -57,10 +58,8 @@ ChatRoom::ChatRoom(string subject)
             usleep(100000);
             if(firstUser == true){
                 cout<<"FirstUser"<<endl;
-                setFallBack(clientIp, port);
                 firstUser = false;
                 notifyFallBackResponsiblity(clisocket);
-
             }
             else{
                 cout<<"not first user"<<endl;
@@ -83,21 +82,17 @@ void ChatRoom::notifyFallBackResponsiblity(int cli){
     cout<<"resp notified"<<endl;
 }
 
-void ChatRoom::setFallBack(string ip, int port){
-    this->fallBackIp = ip;
-    this->fallBackPort = port;
+void ChatRoom::setFallBack(string str){
+    fallBackString = str;
     cout<<"fallback set"<<endl;
 }
 
 void ChatRoom::sendFallBackInfo(int cli){
-    string fallBackInfoString = "###";
-    fallBackInfoString += "fallback" + fallBackIp + "#" +to_string(fallBackPort)+"\0";
-    cout<<"writubg to "<<cli<<endl;
-    cout<<"sending fallabck stirng :"<<fallBackInfoString<<endl;
-    cout<<"send fbinfo Writting"<<endl; cout<<write(cli, fallBackInfoString.c_str(), fallBackInfoString.length())<<endl;
-
+    cout<<"send fbinfo Writting"<<endl;
+    cout<<write(cli, fallBackString.c_str(), fallBackString.length())<<endl;
 }
 void ChatRoom::setFds(){
+
     vector<User>::iterator i;
     i = activeUsers.begin();
     FD_ZERO(&readfds);
@@ -148,25 +143,32 @@ void ChatRoom::removeUser(string s){
 
 
 void ChatRoom::handleControlMessage(Message m){
+    cout<<"handle control Message : "<<m.getText()<<endl;
     if(strstr(m.getText(),"###close")!=NULL)
         removeUser(m.getFrom());
-    else if(strstr(m.getText(),"###heartbeat"))
+    else if(strstr(m.getText(),"###heartbeat")!=NULL)
         replyHeartBeat(m.getFrom(),m.getText());
+    else if(strstr(m.getText(),"###fallback")!=NULL){
+        setFallBack(m.getText());
+        cout<<"fbaddress received"<<m.getText()<<endl;
+    }
+
 }
 
 void ChatRoom::replyHeartBeat(string s, char *text){
-    vector<User>::iterator i;
-    i=activeUsers.begin();
-    pthread_mutex_lock(&lock);
-    cout<<"Aquiring lock for heartbeat"<<endl;
-    while(i != activeUsers.end()){
-        if(i->getName() == s){
-            break;
+        vector<User>::iterator i;
+        i=activeUsers.begin();
+        //cout<<"Aquiring lock for heartbeat"<<endl;
+        pthread_mutex_lock(&lock);
+        while(i != activeUsers.end()){
+            if(i->getName() == s){
+                break;
+            }
+            i++;
         }
-        i++;
-    }
-    cout<<"Heartbeat Writting"<<endl; write(i->getSocket(), text, strlen(text));
-    pthread_mutex_unlock(&lock);
+        //cout<<"Heartbeat Writting"<<endl;
+        write(i->getSocket(), text, strlen(text));
+        pthread_mutex_unlock(&lock);
 }
 
 bool ChatRoom::isControlMessage(Message m){
@@ -222,8 +224,8 @@ void ChatRoom::chatReadManagement(void ){
             handleControlMessage(*mi);
         }
         removeList.clear();
-
         usleep(100000);
+
     }
 }
 

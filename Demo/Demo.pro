@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         chatclient.cpp \
-    unicast.cpp
+    unicast.cpp \
+    host.cpp
 
 HEADERS  += chatclient.h \
-    unicast.h
+    unicast.h \
+    host.h
 
 FORMS    += chatclient.ui \
     unicast.ui

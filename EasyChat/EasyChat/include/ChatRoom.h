@@ -28,8 +28,7 @@ class ChatRoom
         struct timeval tv;
         void setFds();
         fd_set readfds;
-        string fallBackIp;
-        int fallBackPort;
+        string fallBackString;
         int servSocket;
         int heartBeatSocket;
         vector<User> activeUsers;
@@ -37,7 +36,7 @@ class ChatRoom
         vector<Message> msgsToWrite;
         string subject;
         void notifyFallBackResponsiblity(int);
-        void setFallBack(string, int);
+        void setFallBack(string);
         void addUser(string name, string clientIp, int sock, int port);
         void removeUser(string name);
         void handleControlMessage(Message m);
@@ -49,6 +48,7 @@ class ChatRoom
         void setFallBackInfo(string clientIp,int clisocket,int port);
         void chatWriteManagement();
         void heartBeat();
+        static int iter;
 };
 
 #endif // CHATROOM_H
