@@ -74,14 +74,20 @@ void ChatClient::initializeIncoming(){
    incomming = new QTcpServer(this);
    qsrand(QTime::currentTime().msec());
    inPort = 1024 + qrand()%(65535 - 1024);
-   if(!incomming->listen(QHostAddress::Any, inPort)){
-       //std::cout << "incomming server not started";
-       ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " incoming server failed " +QString::number(inPort) + "\n");
+   do{
+       inPort = 1024 + qrand()%(65535 - 1024);
    }
-   else{
-       ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "server ruuning on My local Ip" +QString::number(inPort) + "\n");
-      // std::cout << "incomming server server running";
-   }
+   while(!incomming->listen(QHostAddress::Any, inPort));
+
+
+//   if(!incomming->listen(QHostAddress::Any, inPort)){
+//       //std::cout << "incomming server not started";
+//       ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " incoming server failed " +QString::number(inPort) + "\n");
+//   }
+//   else{
+//       ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "server ruuning on My local Ip" +QString::number(inPort) + "\n");
+//      // std::cout << "incomming server server running";
+//   }
    connect(incomming, SIGNAL(newConnection()), this, SLOT(incommingNewConnection()));
 }
 
@@ -98,13 +104,14 @@ void ChatClient::incommingNewConnection(){
 void ChatClient::msgFromPrevious(){
     while(peerToPeerIncomming->bytesAvailable() > 0){
         QString str = peerToPeerIncomming->readAll();
-        ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + "raw msg Received" + str + "\n");
-        //<originator=
-        QString temp = str.remove(0, 12);
-        QString name = temp.mid(temp.indexOf(">") + 1, temp.length());
-        if(!(this->windowTitle() == name)){
-            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + name + ":" + str + "\n");
-            outgoing->write(str.toStdString().c_str());
+        QString str1(str);
+        //<originator
+        QString temp = str.mid(0, str.indexOf(">"));
+        temp.remove(0,11);
+        str.remove(0,str.indexOf(">")+1);
+        if(!(this->windowTitle() == temp)){
+            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + temp + ":" + str + "\n");
+            outgoing->write(str1.toStdString().c_str());
         }
     }
 }
@@ -170,7 +177,7 @@ void ChatClient::myNewConnection() {
     QTcpSocket *socket = server->nextPendingConnection();
     connect(socket, SIGNAL(readyRead()), this, SLOT(newHostReadyRead()));
     qsrand(socket->localPort());
-    QThread::usleep(qrand()%3500);
+    QThread::usleep(qrand()%5000);
     QString instructionString = "youconnecto" + ring.last().ip+ "#" + QString::number(ring.last().port);
     socket->write(instructionString.toStdString().c_str());
     clients.append(socket);
