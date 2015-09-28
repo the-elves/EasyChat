@@ -1,13 +1,33 @@
 #include "ChatRoom.h"
 #include<string>
+#include<strings.h>
+#include<ifaddrs.h>
 #include<iostream>
 int ChatRoom::iter;
 using namespace std;
+/**
+    Constructor
+*/
 ChatRoom::ChatRoom(string subject)
 {
     tv.tv_sec = 2;
     tv.tv_usec = 0;
     firstUser = true;
+    struct ifaddrs *ifap, *ifa;
+    struct sockaddr_in *sa;
+    char *addr;
+    char myIp[12];
+    getifaddrs(&ifap);
+    for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr->sa_family==AF_INET) {
+            sa = (struct sockaddr_in *) ifa->ifa_addr;
+            addr = inet_ntoa(sa->sin_addr);
+            if(strcmp(ifa->ifa_name,"eth0") == 0)
+                strcpy(myIp, addr);
+        }
+    }
+
+    freeifaddrs(ifap);
     pthread_mutex_init(&lock,NULL);
     sockaddr_in localhost, client;
     unsigned long clilen;
@@ -16,7 +36,7 @@ ChatRoom::ChatRoom(string subject)
     servSocket = socket(AF_INET,SOCK_STREAM ,0);
     bzero(&localhost,sizeof(sockaddr_in));
     localhost.sin_family = AF_INET;
-    inet_aton("127.0.0.1", &(localhost.sin_addr));
+    inet_aton(myIp, &(localhost.sin_addr));
     localhost.sin_port = htons(1234);
     int b = bind(servSocket,(sockaddr*)&localhost,sizeof(sockaddr_in));
     if(b<0){
@@ -72,7 +92,10 @@ ChatRoom::ChatRoom(string subject)
 
 }
 
-
+/**
+    This function notifies the fallback server responsiblity to the first node
+    that connects to chat server
+*/
 
 void ChatRoom::notifyFallBackResponsiblity(int cli){
     string fallBackInfoString = "###";
@@ -81,16 +104,24 @@ void ChatRoom::notifyFallBackResponsiblity(int cli){
     cout<<"notify Writting"<<endl; cout<<write(cli, fallBackInfoString.c_str(), fallBackInfoString.length())<<endl;
     cout<<"resp notified"<<endl;
 }
-
+/** Sets the fallback string,
+    It is ip and port of the fallback server
+*/
 void ChatRoom::setFallBack(string str){
     fallBackString = str;
     cout<<"fallback set"<<endl;
 }
-
+/**
+    This function send a fall back info to the newly conncected clients
+*/
 void ChatRoom::sendFallBackInfo(int cli){
     cout<<"send fbinfo Writting"<<endl;
     cout<<write(cli, fallBackString.c_str(), fallBackString.length())<<endl;
 }
+
+/**
+    This sets the Feature Descriptor macros
+*/
 void ChatRoom::setFds(){
 
     vector<User>::iterator i;
@@ -100,9 +131,17 @@ void ChatRoom::setFds(){
         FD_SET(i->getSocket(),&readfds);
     }
 }
+
+/**
+Destructor
+*/
 ChatRoom::~ChatRoom(){
     close(servSocket);
 }
+/**
+Adds a new user to the vector of current users.
+
+*/
 void ChatRoom::addUser(string name, string clientIp, int sock,int port){
     User tempUser(name, clientIp, sock, port);
     activeUsers.push_back(tempUser);
@@ -115,7 +154,10 @@ void ChatRoom::addUser(string name, string clientIp, int sock,int port){
         cout<<"adduser Writting"<<endl; write(i->getSocket(), onlineUsersName.c_str(), strlen(onlineUsersName.c_str())+1);
     }
 }
+/**
+removes a user from the vector of current users.
 
+*/
 void ChatRoom::removeUser(string s){
     vector<User>::iterator i;
     pthread_mutex_lock(&lock);
@@ -141,7 +183,9 @@ void ChatRoom::removeUser(string s){
     pthread_mutex_unlock(&lock);
 }
 
-
+/**
+Handles a control Message According to its type
+*/
 void ChatRoom::handleControlMessage(Message m){
     cout<<"handle control Message : "<<m.getText()<<endl;
     if(strstr(m.getText(),"###close")!=NULL)
@@ -154,7 +198,9 @@ void ChatRoom::handleControlMessage(Message m){
     }
 
 }
-
+/**
+Replies to hearbeat control message
+*/
 void ChatRoom::replyHeartBeat(string s, char *text){
         vector<User>::iterator i;
         i=activeUsers.begin();
@@ -170,7 +216,9 @@ void ChatRoom::replyHeartBeat(string s, char *text){
         write(i->getSocket(), text, strlen(text));
         pthread_mutex_unlock(&lock);
 }
-
+/**
+Checks if current message is a control Message or not
+*/
 bool ChatRoom::isControlMessage(Message m){
 
     cout<<"Checkning cm "<<endl;
@@ -179,7 +227,14 @@ bool ChatRoom::isControlMessage(Message m){
     else
     return false;
 }
-
+/**
+This is a function which runs in an independent thread.
+It loops over all the sockes using FDs and checks if there is a new message in any of them.
+When it finds new message,
+It checks if it is a unicast message, broadcast message, or control message.
+Then takes actions accordingly
+All the messages are stored in msgs for logging purpose.
+*/
 void ChatRoom::chatReadManagement(void ){
     vector<User>::iterator i;
     vector<Message> removeList;
@@ -229,7 +284,10 @@ void ChatRoom::chatReadManagement(void ){
     }
 }
 
-
+/**
+Called from read management to forward messages to individual sockets
+The messages are are read from a vector<Message> msgsToWrite;
+*/
 void ChatRoom::chatWriteManagement(){
     //cout<< "in writewrite managemt"<<endl;
     vector<User>::iterator i;

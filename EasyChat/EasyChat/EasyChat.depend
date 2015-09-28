@@ -196,9 +196,11 @@
 1443202052 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/Message.cpp
 	"Message.h"
 
-1443364195 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/ChatRoom.cpp
+1443411837 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/ChatRoom.cpp
 	"ChatRoom.h"
 	<string>
+	<strings.h>
+	<ifaddrs.h>
 	<iostream>
 
 1443202052 source:/home/illuminati/EasyChat 1.2/EasyChat/EasyChat/src/User.cpp

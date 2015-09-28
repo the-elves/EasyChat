@@ -11,7 +11,10 @@
 #include <QMessageBox>
 std::vector<QPushButton*> ChatClient::onlineUsers;
 std::vector<Unicast*> ChatClient::unichat;
+/**
+    This is a constructor
 
+*/
 ChatClient::ChatClient(QString subject, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ChatClient) {
@@ -24,8 +27,13 @@ ChatClient::ChatClient(QString subject, QWidget *parent) :
     ui->textEditMsg->hide();
     handlingRequest=false;
     ui->labelOnlineUsers->hide();
-    Ip = "127.0.0.1";
+    Ip = "172.17.13.59";
 }
+/**
+ * @brief ChatClient::heartBeatSend
+ * This function sends a hearbeat signal to the server.
+ *
+ */
 
 void ChatClient::heartBeatSend(){
     heartBeatReceived = false;
@@ -33,6 +41,11 @@ void ChatClient::heartBeatSend(){
     writeMessage(s);
     std::cout<<"Heartbeat sent"<<std::endl;
 }
+
+/**
+ * @brief ChatClient::heartBeatReceive
+ * Checks if the sent hearbeat is received. If not switches to peer to pper mode
+ */
 
 void ChatClient::heartBeatReceive(){
     if(heartBeatReceived){
@@ -75,7 +88,13 @@ void ChatClient::heartBeatReceive(){
     }
 }
 
+
 //common
+
+/**
+ * @brief ChatClient::initializeIncoming
+ * It initialize the incoming socket on every node.
+ */
 void ChatClient::initializeIncoming(){
    incomming = new QTcpServer(this);
    qsrand(QTime::currentTime().msec());
@@ -99,6 +118,11 @@ void ChatClient::initializeIncoming(){
 
 
 //new connection on incomming port for client
+
+/**
+ * @brief ChatClient::incommingNewConnection
+ * Handles connectin requests for the incoming socket on every node.
+ */
 void ChatClient::incommingNewConnection(){
     ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + "someone connected on incommming "+ "\n");
     peerToPeerIncomming = incomming->nextPendingConnection();
@@ -107,6 +131,11 @@ void ChatClient::incommingNewConnection(){
 }
 
 //onclient message received from previous node in chain
+/**
+ * @brief ChatClient::msgFromPrevious
+ * Handles a message received in the ring topology created.
+ * It forwards the message if it is not the originator of the message.
+ */
 void ChatClient::msgFromPrevious(){
     while(peerToPeerIncomming->bytesAvailable() > 0){
         QString str = peerToPeerIncomming->readAll();
@@ -125,6 +154,11 @@ void ChatClient::msgFromPrevious(){
 }
 
 //onclinet
+/**
+ * @brief ChatClient::connectToFallbackServer
+ * This method connects a node to a fallback server.
+ * It then sends its own incoming socket address to fall back server to connect
+ */
 void ChatClient::connectToFallbackServer() {
     QHostAddress addr(this->Ip);
     peer.connectToHost(addr, port);
@@ -141,6 +175,11 @@ void ChatClient::connectToFallbackServer() {
 }
 
 //on client read form fallback server
+/**
+ * @brief ChatClient::fallbackReadyRead
+ * Receives the replies from fallback server
+ * It then fetches the node it should connect to
+ */
 void ChatClient::fallbackReadyRead() {
     while(peer.bytesAvailable() > 0)
     {
@@ -172,6 +211,10 @@ void ChatClient::fallbackReadyRead() {
     }
 }
 //on miniserver
+/**
+ * @brief ChatClient::startFallbackServer
+ * Starts fall back server. After heart beat is failed
+ */
 void ChatClient::startFallbackServer() {
     server = new QTcpServer(this);
     if(!server->listen(QHostAddress::Any, port)){
@@ -184,6 +227,11 @@ void ChatClient::startFallbackServer() {
     connect(server, SIGNAL(newConnection()), this, SLOT(myNewConnection()));
 }
 //on newconn to miniserver
+/**
+ * @brief ChatClient::myNewConnection
+ * Handles new connection to the fallback server.
+ * Send the client the should connect to according
+ */
 void ChatClient::myNewConnection() {
     handlingRequest = true;
     QTcpSocket *socket = server->nextPendingConnection();
@@ -199,6 +247,14 @@ void ChatClient::myNewConnection() {
 }
 
 //on miniserver to read client ip
+/**
+ * @brief ChatClient::newHostReadyRead
+ * Callback for a message from new host connected. It reads the hosts socket address
+ * If the socket address is conflicting asks the host to pick another
+ * Then it adds the hosts to ring topology
+ * Instructs host to connect to last member of ring
+ * And the mini server(fallback server) connects to the new host.
+ */
 void ChatClient::newHostReadyRead(){
     while(currentClient->bytesAvailable() > 0)
     {
@@ -236,17 +292,18 @@ void ChatClient::newHostReadyRead(){
 
 
 //old--------------------------------------------------------------------------------------
-void ChatClient::createRing() {
-    for(int i = 0; i < clients.length(); i++) {
-
-    }
-}
-
+/**
+ * @brief ChatClient::~ChatClient
+ * Destructor
+ */
 ChatClient::~ChatClient() {
     client.close();
     delete ui;
 }
-
+/**
+ * @brief ChatClient::start Initialization function called by qt
+ * @param msg
+ */
 void ChatClient::start(const QString& msg) {
     //std::cout << "ChatClient start ";
     QSignalMapper* mapper = new QSignalMapper(this);
@@ -268,13 +325,20 @@ void ChatClient::start(const QString& msg) {
     modeCentralized = true;
 
 }
-
+/**
+ * @brief ChatClient::startConnection starts connection with the server
+ * @param address
+ * @param port
+ */
 void ChatClient::startConnection(QString address, quint16 port) {
     //std::cout << "ChatClient startconnection ";
     QHostAddress addr(address);
     client.connectToHost(addr, port);
 }
-
+/**
+ * @brief ChatClient::writeMessage writes message to the server
+ * @param msg
+ */
 void ChatClient::writeMessage(const QString& msg) {
     //std::cout << "ChatClient transfer ";
     const QString* msgQStr = &msg;
@@ -283,7 +347,11 @@ void ChatClient::writeMessage(const QString& msg) {
     client.write(messageCh, 50);
 }
 
-
+/**
+ * @brief ChatClient::readyRead Callback for receiving message from server
+ * It can be a control message or it can be a Text message
+ * It takes action accordingly
+ */
 void ChatClient::readyRead() {
 
     while(client.bytesAvailable() > 0) {
@@ -357,7 +425,9 @@ void ChatClient::readyRead() {
 
 
 }
-
+/**
+ * @brief ChatClient::unicast
+ */
 void ChatClient::unicast() {
     QPushButton* button = qobject_cast<QPushButton*>(sender());
     QString str = button->text();
@@ -389,7 +459,10 @@ void ChatClient::unicast() {
         }
     }
 }
-
+/**
+ * @brief ChatClient::on_pushButtonSend_clicked
+ * GUI callback for send button click event
+ */
 void ChatClient::on_pushButtonSend_clicked() {
     if(modeCentralized){
     ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + ui->lineEditName->text() + ": " + ui->textEditMsg->toPlainText() + "\n");
@@ -408,7 +481,10 @@ void ChatClient::on_pushButtonSend_clicked() {
         ui->textEditMsg->setText("");
     }
 }
-
+/**
+ * @brief ChatClient::on_textEditMsg_textChanged
+ * GUI callback for type in edit message text box event
+ */
 void ChatClient::on_textEditMsg_textChanged() {
     if(ui->textEditMsg->toPlainText() == "")
         ui->pushButtonSend->setEnabled(false);
@@ -425,7 +501,7 @@ void ChatClient::on_lineEditName_textChanged() {
 
 void ChatClient::on_pushButtonConnect_clicked() {
     start(ui->lineEditName->text());
-    startConnection("127.0.0.1", 1234);
+    startConnection(Ip, 1234);
     this->setWindowTitle(ui->lineEditName->text());
     ui->textBrowserChat->show();
     ui->pushButtonSend->show();
