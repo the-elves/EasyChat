@@ -349,7 +349,7 @@ void ChatClient::readyRead() {
 
         }
         else {
-          //  ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + str + "\n");
+            ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + str + "\n");
         }
         std::cout<<str.toStdString()<<std::endl;
     }
@@ -394,8 +394,8 @@ void ChatClient::on_pushButtonSend_clicked() {
     if(modeCentralized){
     ui->textBrowserChat->setText(ui->textBrowserChat->toPlainText() + QTime::currentTime().toString() + " " + ui->lineEditName->text() + ": " + ui->textEditMsg->toPlainText() + "\n");
     writeMessage(ui->textEditMsg->toPlainText());
-    ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
-    ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
+//    ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
+//    ui->textBrowserChat->verticalScrollBar()->setValue(ui->textBrowserChat->verticalScrollBar()->maximum());
     ui->textEditMsg->setText("");
     }
     else{
